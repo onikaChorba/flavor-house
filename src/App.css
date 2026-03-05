@@ -1,0 +1,25 @@
+*,
+*::before,
+*::after {
+  --bg: #121212;
+  --primary: #FF7A18;
+  --accent: #2ED3B7;
+  --text-primary: #F5F5F5;
+  --text-secondary: #A1A1AA;
+  --btn-hover: #FF8F3A;
+  --active-accent: #23B8A0;
+  --bg-cards: #1C1C1E;
+  --borders: #2A2A2E;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: inherit;
+}
+
+body {
+  line-height: 1.5;
+  font-family: "Inter", sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+}

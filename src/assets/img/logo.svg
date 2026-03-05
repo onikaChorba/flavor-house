@@ -1,0 +1,15 @@
+<svg width="260" height="60" viewBox="0 0 260 60" xmlns="http://www.w3.org/2000/svg">
+  <rect width="260" height="60" rx="12" fill="#121212"/>
+  
+  <!-- Icon -->
+  <path d="M20 38V26L34 16L48 26V38" stroke="#FF7A18" stroke-width="3" fill="none"/>
+  <line x1="34" y1="22" x2="34" y2="36" stroke="#2ED3B7" stroke-width="3"/>
+  
+  <!-- Text -->
+  <text x="70" y="38" fill="#F5F5F5"
+        font-size="24"
+        font-family="Poppins, sans-serif"
+        letter-spacing="1">
+    FLAVOR HOUSE
+  </text>
+</svg>
