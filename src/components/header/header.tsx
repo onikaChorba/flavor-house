@@ -1,11 +1,18 @@
 import Icons from "../../icons";
+import { useState } from "react";
+import { Link } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from "@mui/icons-material/Close";
 import { AppBar, Toolbar, Button, Box, IconButton, Container, Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
-import { useState } from "react";
 
 const Header = () => {
-  const navItems = ['Меню', 'Акції', 'Про нас', 'Контакти'];
+  const navItems = [
+    { name: 'Меню', path: '/menu' },
+    { name: 'Акції', path: '/promo' },
+    { name: 'Про нас', path: '/about' },
+    { name: 'Контакти', path: '/contacts' }
+  ];
+
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
@@ -27,19 +34,23 @@ const Header = () => {
           padding: '0.rem 0'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <img
-              src={Icons.logo}
-              alt="Logo"
-              style={{
-                height: "40px",
-                cursor: 'pointer'
-              }} />
+            <Link to="/">
+              <img
+                src={Icons.logo}
+                alt="Logo"
+                style={{
+                  height: "40px",
+                  cursor: 'pointer'
+                }} />
+            </Link>
           </Box>
 
           <Box sx={{ display: { xs: "none", md: "flex", gap: '2rem' } }}>
             {navItems.map((item) => (
               <Button
-                key={item}
+                key={item.name}
+                component={Link}
+                to={item.path}
                 sx={{
                   color: 'var(--text-secondary)',
                   textTransform: 'none',
@@ -47,17 +58,24 @@ const Header = () => {
                   '&:hover': { color: 'var(--primary)' }
                 }}
               >
-                {item}
+                {item.name}
               </Button>
             ))}
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Button variant="contained" sx={{
-              backgroundColor: 'var(--primary)',
-              display: { xs: 'none', sm: 'none', md: "block" },
-              '&:hover': { backgroundColor: 'var(--btn-hover)' }
-            }}>Замовити</Button>
+            <Button
+              variant="contained"
+              component={Link}
+              to="/menu"
+              sx={{
+                backgroundColor: 'var(--primary)',
+                display: { xs: 'none', md: "block" },
+                '&:hover': { backgroundColor: 'var(--btn-hover)' }
+              }}
+            >
+              Замовити
+            </Button>
           </Box>
 
           <IconButton onClick={handleDrawerToggle} sx={{ display: { xs: 'flex', md: 'none' }, color: 'var(--accent)' }}>
@@ -91,8 +109,10 @@ const Header = () => {
 
         <List>
           {navItems.map((item) => (
-            <ListItem key={item} disablePadding>
+            <ListItem key={item.name} disablePadding>
               <ListItemButton
+                component={Link}
+                to={item.path}
                 onClick={handleDrawerToggle}
                 sx={{
                   borderRadius: '8px',
@@ -103,7 +123,7 @@ const Header = () => {
                   }
                 }}
               >
-                <ListItemText primary={item} />
+                <ListItemText primary={item.name} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -111,6 +131,9 @@ const Header = () => {
             <Button
               fullWidth
               variant="contained"
+              component={Link}
+              to="/menu"
+              onClick={handleDrawerToggle}
               sx={{ backgroundColor: 'var(--primary)', py: 1.5 }}
             >
               Замовити
