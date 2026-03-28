@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
-  Container, Typography, Box, CircularProgress, Fade, InputAdornment, TextField, Tabs, Tab
+  Container, Typography, Box, CircularProgress, Fade, InputAdornment, TextField, Tabs, Tab, MenuItem as MuiMenuItem, FormControl, Select
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { MenuCard } from '../components';
@@ -20,6 +20,7 @@ const Menu: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('default');
 
   useEffect(() => {
     fetch('https://free-food-menus-api-two.vercel.app/all')
@@ -46,18 +47,22 @@ const Menu: React.FC = () => {
     }
 
     if (searchQuery) {
-      list = list.filter(item => {
-        const name = item.name ? item.name.toLowerCase() : '';
-        const dsc = item.dsc ? item.dsc.toLowerCase() : '';
-        const query = searchQuery.toLowerCase();
-
-        return name.includes(query) || dsc.includes(query);
-      });
+      const query = searchQuery.toLowerCase();
+      list = list.filter(item =>
+        (item.name?.toLowerCase() || '').includes(query) ||
+        (item.dsc?.toLowerCase() || '').includes(query)
+      );
     }
+    let uniqueList = Array.from(new Map(list.filter(i => i?.id).map(item => [item.id, item])).values());
 
-    return Array.from(new Map(list.filter(item => item && item.id).map(item => [item.id, item])).values());
-  }, [items, activeTab, searchQuery]);
-
+    return uniqueList.sort((a, b) => {
+      if (sortBy === 'rate') return b.rate - a.rate;
+      if (sortBy === 'price-low') return a.price - b.price;
+      if (sortBy === 'price-high') return b.price - a.price;
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
+      return 0;
+    });
+  }, [items, activeTab, searchQuery, sortBy]);
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
@@ -93,30 +98,61 @@ const Menu: React.FC = () => {
             ))}
           </Tabs>
         </Container>
+        <Box sx={{
+          display: "flex",
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 2,
+          width: '100%',
+          maxWidth: '800px',
+          justifyContent: 'center'
+        }}>
+          <TextField
+            fullWidth
+            placeholder="Пошук улюбленої страви..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{
+              maxWidth: '100%',
+              backgroundColor: 'var(--bg-cards)',
+              borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
+                color: 'var(--text-primary)',
+                '& fieldset': { borderColor: 'var(--borders)' },
+                '&:hover fieldset': { borderColor: 'var(--primary)' },
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: 'var(--text-secondary)' }} />
+                </InputAdornment>
+              ),
+            }}
+          />
 
-        <TextField
-          fullWidth
-          placeholder="Пошук улюбленої страви..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{
-            maxWidth: '100%',
-            backgroundColor: 'var(--bg-cards)',
-            borderRadius: '12px',
-            '& .MuiOutlinedInput-root': {
-              color: 'var(--text-primary)',
-              '& fieldset': { borderColor: 'var(--borders)' },
-              '&:hover fieldset': { borderColor: 'var(--primary)' },
-            }
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'var(--text-secondary)' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
+          <FormControl sx={{ minWidth: { xs: '100%', md: '200px' } }}>
+            <Select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              displayEmpty
+              sx={{
+                backgroundColor: 'var(--bg-cards)',
+                color: 'var(--text-primary)',
+                borderRadius: '12px',
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--borders)' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--primary)' },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'var(--accent)' },
+                '& .MuiSvgIcon-root': { color: 'var(--text-secondary)' }
+              }}
+            >
+              <MuiMenuItem value="default">За замовчуванням</MuiMenuItem>
+              <MuiMenuItem value="rate">За рейтингом </MuiMenuItem>
+              <MuiMenuItem value="price-low">Найдешевші </MuiMenuItem>
+              <MuiMenuItem value="price-high">Найдорожчі </MuiMenuItem>
+              <MuiMenuItem value="name">За назвою (А-Я)</MuiMenuItem>
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
       <Box sx={{
         display: 'flex',
