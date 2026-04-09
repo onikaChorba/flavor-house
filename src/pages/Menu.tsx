@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
-  Container, Typography, Box, CircularProgress, Fade, InputAdornment, TextField, Tabs, Tab, MenuItem as MuiMenuItem, FormControl, Select
+  Container, Typography, Box, CircularProgress, Fade, InputAdornment, TextField, Tabs, Tab, MenuItem as MuiMenuItem, FormControl, Select, Pagination
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { MenuCard } from '../components';
@@ -21,6 +21,8 @@ const Menu: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('default');
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     fetch('https://free-food-menus-api-two.vercel.app/all')
@@ -34,6 +36,10 @@ const Menu: React.FC = () => {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, activeTab, sortBy]);
 
   const categories = useMemo(() => ['all', ...Object.keys(items)], [items]);
 
@@ -63,6 +69,19 @@ const Menu: React.FC = () => {
       return 0;
     });
   }, [items, activeTab, searchQuery, sortBy]);
+
+  const count = Math.ceil(filteredItems.length / itemsPerPage);
+  const currentItems = useMemo(() => {
+    const begin = (page - 1) * itemsPerPage;
+    const end = begin + itemsPerPage;
+    return filteredItems.slice(begin, end);
+  }, [page, filteredItems]);
+
+  const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
@@ -160,8 +179,8 @@ const Menu: React.FC = () => {
         gap: '24px',
         justifyContent: 'center',
       }}>
-        {filteredItems.length > 0 ? (
-          filteredItems.map((item, index) => (
+        {currentItems.length > 0 ? (
+          currentItems.map((item, index) => (
             <Fade in={true} timeout={200} key={`${item.id}-${index}`}>
               <Box sx={{
                 width: { xs: '100%', sm: 'calc(50% - 12px)', md: 'calc(33.333% - 16px)' }
@@ -176,6 +195,31 @@ const Menu: React.FC = () => {
           </Typography>
         )}
       </Box>
+
+      {count > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+          <Pagination
+            count={count}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+            sx={{
+              '& .MuiPaginationItem-root': {
+                color: 'var(--text-primary)',
+                borderColor: 'var(--borders)',
+                '&.Mui-selected': {
+                  backgroundColor: 'var(--primary)',
+                  color: '#fff',
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 122, 24, 0.1)',
+                }
+              }
+            }}
+          />
+        </Box>
+      )}
     </Container>
   );
 };
