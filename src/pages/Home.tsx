@@ -83,10 +83,13 @@ const Home = () => {
 
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={4}
-            alignItems="center"
-            justifyContent="space-between"
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 4, // Заміна spacing={4}
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
           >
             <Box
               component={motion.div}
