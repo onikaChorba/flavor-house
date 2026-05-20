@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
+import { useCart } from '../../context/CartContext';
 
 interface MenuCardProps {
   item: {
@@ -30,6 +31,7 @@ const placeholderTexts = [
 
 
 const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
+  const { addToCart } = useCart();
   const [imgError, setImgError] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
@@ -37,7 +39,15 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
   const handleDecrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = () => {
-    console.log(`Додано в кошик: ${item.name}, кількість: ${quantity}, сума: ${item.price * quantity}₴`);
+    addToCart({
+      id: item.id,
+      name: item.name,
+      description: item.dsc,
+      price: item.price,
+      quantity: quantity,
+      image: item.img || ''
+    });
+    setQuantity(1);
   };
 
   const randomText = useMemo(() =>
