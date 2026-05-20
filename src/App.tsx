@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import { Header } from './components';
+import { Header, Footer } from './components';
 import { Home, Menu, Promo, About, Contacts } from './pages';
 
 function App() {
@@ -17,6 +17,7 @@ function App() {
           <Route path='/contacts' element={<Contacts />} />
         </Routes>
       </main>
+      <Footer />
     </Router>
   )
 }
