@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import StarIcon from '@mui/icons-material/Star';
-import LocationIcon from '@mui/icons-material/LocationCity';
+import { LocationCity, Remove, Add } from '@mui/icons-material';
 import {
-  Card, CardMedia, CardContent, Typography, Box, Chip, Button
+  Card, CardMedia, CardContent, Typography, Box, Chip, Button, IconButton
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
+import { useCart } from '../../context/CartContext';
 
 interface MenuCardProps {
   item: {
@@ -19,21 +20,41 @@ interface MenuCardProps {
   };
 }
 
-const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
-  const [imgError, setImgError] = useState(false);
+const placeholderTexts = [
+  "Шеф-кухар з'їв це, поки ми фотографували 🤤",
+  "Настільки смачно, що камера розплавилася 🔥",
+  "Фотограф пішов за добавкою і не повернувся 🚶‍♂️",
+  "Це секретна розробка, фото заборонені 🤫",
+  "Уявіть щось неймовірне. Це воно! ✨",
+  "Ми намагалися сфотографувати, але аромат збив нас з ніг 💨"
+];
 
-  const placeholderTexts = [
-    "Шеф-кухар з'їв це, поки ми фотографували 🤤",
-    "Настільки смачно, що камера розплавилася 🔥",
-    "Фотограф пішов за добавкою і не повернувся 🚶‍♂️",
-    "Це секретна розробка, фото заборонені 🤫",
-    "Уявіть щось неймовірне. Це воно! ✨",
-    "Ми намагалися сфотографувати, але аромат збив нас з ніг 💨"
-  ];
+
+const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
+  const { addToCart } = useCart();
+  const [imgError, setImgError] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+
+  const handleIncrement = () => setQuantity(prev => prev + 1);
+  const handleDecrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: item.id,
+      name: item.name,
+      description: item.dsc,
+      price: item.price,
+      quantity: quantity,
+      image: item.img || ''
+    });
+    setQuantity(1);
+  };
 
   const randomText = useMemo(() =>
     placeholderTexts[Math.floor(Math.random() * placeholderTexts.length)],
     []);
+
+  const productPrice = quantity * item.price
 
   return (
     <Card sx={{
@@ -114,30 +135,60 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
           </Typography>
         </Box>
 
-        <Typography variant="body2" sx={{ color: 'var(--text-secondary)', mb: 3, flexGrow: 1 }}>
-          {item.dsc}
-        </Typography>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="body2" sx={{ color: 'var(--text-secondary)', flexGrow: 1 }}>
+            {item.dsc}
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <LocationIcon sx={{ color: 'var(--accent)', fontSize: '18px' }} />
+            <LocationCity sx={{ color: 'var(--accent)', fontSize: '18px' }} />
             <Typography variant="caption" sx={{ color: 'var(--text-secondary)', fontWeight: 500 }}>
               {item.country}
             </Typography>
           </Box>
+        </Box>
+
+        <Box sx={{ mt: 'auto', display: 'flex', justifyContent: "space-between", alignItems: 'center', gap: '15px' }}>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'var(--bg)',
+            borderRadius: '12px',
+            border: '1px solid var(--borders)',
+            p: 0.5
+          }}>
+            <IconButton size="small" onClick={handleDecrement} sx={{ color: 'var(--text-primary)' }}>
+              <Remove fontSize="small" />
+            </IconButton>
+
+            <Typography sx={{ mx: 2, fontWeight: 700, color: 'var(--text-primary)', minWidth: '20px', textAlign: 'center' }}>
+              {quantity}
+            </Typography>
+
+            <IconButton size="small" onClick={handleIncrement} sx={{ color: 'var(--text-primary)' }}>
+              <Add fontSize="small" />
+            </IconButton>
+          </Box>
+
           <Button
+            fullWidth
             variant="contained"
-            size="small"
+            onClick={handleAddToCart}
             startIcon={<ShoppingCartIcon />}
             sx={{
               backgroundColor: 'var(--primary)',
-              borderRadius: '10px',
+              borderRadius: '12px',
               textTransform: 'none',
-              fontWeight: 600,
-              '&:hover': { backgroundColor: 'var(--btn-hover)' }
+              py: 1.2,
+              fontWeight: 700,
+              boxShadow: '0 4px 12px rgba(255, 122, 24, 0.2)',
+              '&:hover': {
+                backgroundColor: 'var(--btn-hover)',
+                boxShadow: '0 6px 16px rgba(255, 122, 24, 0.3)'
+              }
             }}
           >
-            Додати
+            {productPrice.toFixed(2)}₴
           </Button>
         </Box>
       </CardContent>

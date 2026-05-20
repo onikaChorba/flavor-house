@@ -122,7 +122,6 @@ const Menu: React.FC = () => {
           flexDirection: { xs: 'column', md: 'row' },
           gap: 2,
           width: '100%',
-          maxWidth: '800px',
           justifyContent: 'center'
         }}>
           <TextField

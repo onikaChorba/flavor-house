@@ -1,20 +1,27 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import { Header } from './components';
-import { Home, Menu } from './pages';
+import { Header, Footer } from './components';
+import { Home, Menu, Promo, About, Contacts } from './pages';
+import { CartProvider } from './context';
 
 function App() {
 
   return (
-    <Router>
-      <Header />
-      <main>
-        <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/menu' element={<Menu />} />
-        </Routes>
-      </main>
-    </Router>
+    <CartProvider>
+      <Router>
+        <Header />
+        <main>
+          <Routes>
+            <Route path='/' element={<Home />} />
+            <Route path='/menu' element={<Menu />} />
+            <Route path='/promo' element={<Promo />} />
+            <Route path='/about' element={<About />} />
+            <Route path='/contacts' element={<Contacts />} />
+          </Routes>
+        </main>
+        <Footer />
+      </Router>
+    </CartProvider>
   )
 }
 

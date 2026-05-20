@@ -1,5 +1,7 @@
+import { Cart } from "./cart/cart";
 import Header from "./header/header";
-import { MenuCard } from "./menucard/menu-card";
+import { Footer } from "./footer/footer";
+import { MenuCard } from "./menuCard/menuCard";
 import { BurgerHero } from "./burgerHero/burgerHero"
 
-export { Header, MenuCard, BurgerHero };
+export { Cart, Header, Footer, MenuCard, BurgerHero };

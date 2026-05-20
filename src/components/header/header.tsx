@@ -1,9 +1,13 @@
 import Icons from "../../icons";
 import { useState } from "react";
 import { Link } from 'react-router-dom';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from "@mui/icons-material/Close";
-import { AppBar, Toolbar, Button, Box, IconButton, Container, Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { Menu, Close, ShoppingBag } from '@mui/icons-material';
+import {
+  AppBar, Toolbar, Button, Box, IconButton, Container, Drawer,
+  List, ListItem, ListItemButton, ListItemText, Typography
+} from "@mui/material";
+import { Cart } from "../cart/cart";
+import { useCart } from './../../context/CartContext';
 
 const Header = () => {
   const navItems = [
@@ -14,10 +18,19 @@ const Header = () => {
   ];
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const { cartItems } = useCart();
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleCartToggle = () => {
+    setCartOpen(!cartOpen);
+  };
 
   return (
     <AppBar position="sticky"
@@ -25,13 +38,14 @@ const Header = () => {
         backgroundColor: 'rgba(18, 18, 18, 0.8)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid var(--borders)',
-        boxShadow: 'none'
+        boxShadow: 'none',
+        zIndex: 1201
       }}>
       <Container maxWidth="lg">
         <Toolbar sx={{
           display: 'flex',
           justifyContent: "space-between",
-          padding: '0.rem 0'
+          padding: '0.5rem 0'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Link to="/">
@@ -66,21 +80,42 @@ const Header = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <Button
               variant="contained"
-              component={Link}
-              to="/menu"
+              onClick={handleCartToggle}
+              startIcon={<ShoppingBag />}
               sx={{
                 backgroundColor: 'var(--primary)',
-                display: { xs: 'none', md: "block" },
+                textTransform: 'none',
+                borderRadius: '12px',
+                fontWeight: 700,
+                px: 3,
+                display: { xs: 'none', md: "flex" },
                 '&:hover': { backgroundColor: 'var(--btn-hover)' }
               }}
             >
-              Замовити
+              {totalItems > 0 ? `Кошик: ${totalPrice.toFixed(2)} ₴` : 'Кошик порожній'}
             </Button>
-          </Box>
 
-          <IconButton onClick={handleDrawerToggle} sx={{ display: { xs: 'flex', md: 'none' }, color: 'var(--accent)' }}>
-            <MenuIcon />
-          </IconButton>
+            <IconButton
+              onClick={handleCartToggle}
+              sx={{ display: { xs: 'flex', md: 'none' }, color: 'var(--primary)', position: 'relative' }}
+            >
+              <ShoppingBag />
+              {totalItems > 0 && (
+                <Box sx={{
+                  position: 'absolute', top: 2, right: 2, bgcolor: '#ff4444',
+                  color: '#fff', borderRadius: '50%', width: 18, height: 18,
+                  fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 800
+                }}>
+                  {totalItems}
+                </Box>
+              )}
+            </IconButton>
+
+            <IconButton onClick={handleDrawerToggle} sx={{ display: { xs: 'flex', md: 'none' }, color: 'var(--accent)' }}>
+              <Menu />
+            </IconButton>
+          </Box>
         </Toolbar>
       </Container>
 
@@ -103,7 +138,7 @@ const Header = () => {
       >
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
           <IconButton onClick={handleDrawerToggle} sx={{ color: 'var(--text-secondary)' }}>
-            <CloseIcon />
+            <Close />
           </IconButton>
         </Box>
 
@@ -127,21 +162,38 @@ const Header = () => {
               </ListItemButton>
             </ListItem>
           ))}
-          <ListItem disablePadding sx={{ mt: 3 }}>
-            <Button
-              fullWidth
-              variant="contained"
-              component={Link}
-              to="/menu"
-              onClick={handleDrawerToggle}
-              sx={{ backgroundColor: 'var(--primary)', py: 1.5 }}
-            >
-              Замовити
-            </Button>
-          </ListItem>
         </List>
       </Drawer>
-    </AppBar>);
+
+      <Drawer
+        anchor="right"
+        open={cartOpen}
+        onClose={handleCartToggle}
+        slotProps={{
+          paper: {
+            sx: {
+              width: { xs: '100%', sm: '450px' },
+              backgroundColor: 'var(--bg)',
+              backgroundImage: 'none',
+              borderLeft: '1px solid var(--borders)',
+              overflowX: 'hidden'
+            },
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, borderBottom: '1px solid var(--borders)' }}>
+          <IconButton onClick={handleCartToggle} sx={{ color: 'var(--text-secondary)' }}>
+            <Close />
+          </IconButton>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: '#fff' }}>Ваше замовлення</Typography>
+        </Box>
+
+        <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+          <Cart />
+        </Box>
+      </Drawer>
+    </AppBar>
+  );
 };
 
 export default Header;
