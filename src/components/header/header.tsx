@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Menu, Close, ShoppingBag } from '@mui/icons-material';
 import {
   AppBar, Toolbar, Button, Box, IconButton, Container, Drawer,
-  List, ListItem, ListItemButton, ListItemText, Typography
+  List, ListItem, ListItemButton, ListItemText,
 } from "@mui/material";
 import { Cart } from "../cart/cart";
 import { useCart } from './../../context/CartContext';
