@@ -181,14 +181,7 @@ const Header = () => {
           },
         }}
       >
-        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, borderBottom: '1px solid var(--borders)' }}>
-          <IconButton onClick={handleCartToggle} sx={{ color: 'var(--text-secondary)' }}>
-            <Close />
-          </IconButton>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: '#fff' }}>Ваше замовлення</Typography>
-        </Box>
-
-        <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto' }}>
+        <Box sx={{ height: 'calc(100% - 70px)', overflowY: 'auto', pt: 8 }}>
           <Cart />
         </Box>
       </Drawer>
