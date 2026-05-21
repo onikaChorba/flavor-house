@@ -139,12 +139,14 @@ const Menu: React.FC = () => {
                 '&:hover fieldset': { borderColor: 'var(--primary)' },
               }
             }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: 'var(--text-secondary)' }} />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: 'var(--text-secondary)' }} />
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
