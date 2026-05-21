@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
-  Container, Typography, Box, CircularProgress, Fade, InputAdornment, TextField, Tabs, Tab, MenuItem as MuiMenuItem, FormControl, Select, Pagination
+  Container, Typography, Box, Fade, InputAdornment, TextField, Tabs, Tab, MenuItem as MuiMenuItem, FormControl, Select, Pagination, Skeleton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { MenuCard } from '../components';
@@ -82,13 +82,7 @@ const Menu: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-        <CircularProgress sx={{ color: 'var(--primary)' }} />
-      </Box>
-    );
-  }
+  const skeletonArray = useMemo(() => Array.from(new Array(6)), []);
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -112,11 +106,16 @@ const Menu: React.FC = () => {
               }
             }}
           >
-            {categories.map((cat) => (
-              <Tab key={cat} label={cat === 'all' ? 'Всі' : cat} value={cat} />
-            ))}
+            {loading ? (
+              <Tab label="Всі" value="all" />
+            ) : (
+              categories.map((cat) => (
+                <Tab key={cat} label={cat === 'all' ? 'Всі' : cat} value={cat} />
+              ))
+            )}
           </Tabs>
         </Container>
+
         <Box sx={{
           display: "flex",
           flexDirection: { xs: 'column', md: 'row' },
@@ -129,6 +128,7 @@ const Menu: React.FC = () => {
             placeholder="Пошук улюбленої страви..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            disabled={loading}
             sx={{
               maxWidth: '100%',
               backgroundColor: 'var(--bg-cards)',
@@ -155,6 +155,7 @@ const Menu: React.FC = () => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               displayEmpty
+              disabled={loading}
               sx={{
                 backgroundColor: 'var(--bg-cards)',
                 color: 'var(--text-primary)',
@@ -174,15 +175,47 @@ const Menu: React.FC = () => {
           </FormControl>
         </Box>
       </Box>
+
       <Box sx={{
         display: 'flex',
         flexWrap: 'wrap',
         gap: '24px',
         justifyContent: 'center',
+        minHeight: '500px'
       }}>
-        {currentItems.length > 0 ? (
+        {loading ? (
+          skeletonArray.map((_, index) => (
+            <Box
+              key={`skeleton-${index}`}
+              sx={{
+                width: { xs: '100%', sm: 'calc(50% - 12px)', md: 'calc(33.333% - 16px)' },
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2
+              }}
+            >
+              <Skeleton
+                variant="rectangular"
+                height={220}
+                sx={{ borderRadius: '22px', backgroundColor: 'rgba(255,255,255,0.04)' }}
+                animation="wave"
+              />
+              <Box sx={{ px: 1 }}>
+                <Skeleton width="30%" height={15} sx={{ backgroundColor: 'rgba(255,255,255,0.02)', mb: 1 }} animation="wave" />
+                <Skeleton width="80%" height={26} sx={{ backgroundColor: 'rgba(255,255,255,0.04)', mb: 1.5 }} animation="wave" />
+                <Skeleton width="100%" height={16} sx={{ backgroundColor: 'rgba(255,255,255,0.02)' }} animation="wave" />
+                <Skeleton width="65%" height={16} sx={{ backgroundColor: 'rgba(255,255,255,0.02)', mb: 3 }} animation="wave" />
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Skeleton width="35%" height={32} sx={{ backgroundColor: 'rgba(255,255,255,0.04)' }} animation="wave" />
+                  <Skeleton width="45%" height={44} sx={{ borderRadius: '16px', backgroundColor: 'rgba(255,255,255,0.06)' }} animation="wave" />
+                </Box>
+              </Box>
+            </Box>
+          ))
+        ) : currentItems.length > 0 ? (
           currentItems.map((item, index) => (
-            <Fade in={true} timeout={200} key={`${item.id}-${index}`}>
+            <Fade in={true} timeout={300} key={`${item.id}-${index}`}>
               <Box sx={{
                 width: { xs: '100%', sm: 'calc(50% - 12px)', md: 'calc(33.333% - 16px)' }
               }}>
@@ -191,13 +224,13 @@ const Menu: React.FC = () => {
             </Fade>
           ))
         ) : (
-          <Typography sx={{ color: 'var(--text-secondary)', mt: 4 }}>
+          <Typography sx={{ color: 'var(--text-secondary)', mt: 6 }}>
             Нічого не знайдено за вашим запитом 🍕
           </Typography>
         )}
       </Box>
 
-      {count > 1 && (
+      {!loading && count > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
           <Pagination
             count={count}
