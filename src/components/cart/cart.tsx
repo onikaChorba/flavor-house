@@ -1,14 +1,16 @@
 import { useState, useRef } from 'react';
 import { Typography, Box, IconButton, Button } from '@mui/material';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context';
-import { ShoppingBag, DeleteOutline, Add, Remove, ArrowBackIos } from '@mui/icons-material';
+import { ShoppingBag, DeleteOutline, Add, Remove, ArrowBackIos, CheckCircleOutline } from '@mui/icons-material';
 import { DeliveryForm } from '../deliveryForm/deliveryForm';
+import type { CartItem } from '../../types';
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
 
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
 
   const formRef = useRef<HTMLDivElement>(null);
@@ -20,7 +22,9 @@ const Cart = () => {
     comments: ''
   });
 
-  const itemsPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const [summaryData, setSummaryData] = useState<{ name: string; address: string; total: number; method: 'delivery' | 'pickup' } | null>(null);
+
+  const itemsPrice = cartItems.reduce((sum: number, item: CartItem) => sum + item.price * item.quantity, 0);
   const deliveryPrice = deliveryMethod === 'pickup' || itemsPrice >= 500 ? 0 : 60;
   const finalTotalPrice = itemsPrice + deliveryPrice;
 
@@ -38,16 +42,91 @@ const Cart = () => {
       return;
     }
 
-    const successMessage = deliveryMethod === 'delivery'
-      ? `🎉 Замовлення успішно оформлено!\n\nДякуємо, ${formData.name}! Кур'єр привезе їжу за адресою: ${formData.address}.\nСума до сплати: ${finalTotalPrice.toFixed(2)} ₴`
-      : `🎉 Замовлення успішно оформлено!\n\nДякуємо, ${formData.name}! Чекаємо на вас у нашому ресторані на самовивіз.\nСума до сплати: ${finalTotalPrice.toFixed(2)} ₴`;
+    setSummaryData({
+      name: formData.name,
+      address: formData.address,
+      total: finalTotalPrice,
+      method: deliveryMethod,
+    });
 
-    alert(successMessage);
-
+    setIsSuccess(true);
     clearCart();
     setIsFormVisible(false);
     setFormData({ name: '', phone: '', address: '', comments: '' });
   };
+
+  const handleCloseSuccess = () => {
+    setIsSuccess(false);
+    setSummaryData(null);
+  };
+
+  if (isSuccess && summaryData) {
+    return (
+      <Box
+        component={motion.div}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          p: 4,
+          textAlign: 'center',
+        }}
+      >
+        <CheckCircleOutline sx={{ fontSize: '72px', color: '#4cd137', mb: 3 }} />
+
+        <Typography variant="h5" sx={{ color: '#fff', fontWeight: 800, mb: 1.5 }}>
+          Замовлення прийнято!
+        </Typography>
+
+        <Typography variant="body1" sx={{ color: 'var(--text-secondary)', mb: 3, maxWidth: '280px', lineHeight: 1.5 }}>
+          Дякуємо, <span style={{ color: '#fff', fontWeight: 600 }}>{summaryData.name}</span>!
+          {summaryData.method === 'delivery'
+            ? ` Кур'єр вже збирається та привезе їжу за адресою: ${summaryData.address}.`
+            : ' Чекаємо на вас у нашому ресторані для самовивозу.'}
+        </Typography>
+
+        <Box sx={{
+          width: '100%',
+          backgroundColor: 'rgba(255, 255, 255, 0.02)',
+          borderRadius: '16px',
+          p: 2.5,
+          mb: 4,
+          border: '1px solid rgba(255, 255, 255, 0.05)'
+        }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', display: 'block', mb: 0.5 }}>
+            СУМА ДО СПЛАТИ:
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 900, color: 'var(--accent)' }}>
+            {summaryData.total.toFixed(2)} ₴
+          </Typography>
+        </Box>
+
+        <Button
+          variant="outlined"
+          onClick={handleCloseSuccess}
+          sx={{
+            color: '#fff',
+            borderColor: 'rgba(255, 255, 255, 0.15)',
+            borderRadius: '12px',
+            px: 4,
+            py: 1.2,
+            textTransform: 'none',
+            fontWeight: 700,
+            '&:hover': {
+              borderColor: '#fff',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)'
+            }
+          }}
+        >
+          Зробити нове замовлення
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{
@@ -89,7 +168,7 @@ const Cart = () => {
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3.5, opacity: isFormVisible ? 0.6 : 1, transition: 'opacity 0.2s' }}>
-                {cartItems.map((item: any) => (
+                {cartItems.map((item: CartItem) => (
                   <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     {item.image && (
                       <Box component="img" src={item.image} alt={item.name} sx={{ width: 76, height: 76, borderRadius: '16px', objectFit: 'cover', border: '1px solid rgba(255, 255, 255, 0.05)' }} />
@@ -105,13 +184,13 @@ const Cart = () => {
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Box sx={{ display: 'inline-flex', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.06)', p: '2px' }}>
-                          <IconButton disabled={isFormVisible} size="small" onClick={() => item.quantity > 1 ? updateQuantity(item.id, -1) : removeItem(item.id)} sx={{ color: 'var(--text-secondary)', p: 0.5 }}>
+                          <IconButton disabled={isFormVisible} size="small" onClick={() => item.quantity > 1 ? updateQuantity((String(item.id)), -1) : removeItem(String(item.id))} sx={{ color: 'var(--text-secondary)', p: 0.5 }}>
                             <Remove sx={{ fontSize: '16px' }} />
                           </IconButton>
                           <Typography sx={{ fontWeight: 700, minWidth: '24px', textAlign: 'center', fontSize: '0.9rem', color: '#fff' }}>
                             {item.quantity}
                           </Typography>
-                          <IconButton disabled={isFormVisible} size="small" onClick={() => updateQuantity(item.id, 1)} sx={{ color: 'var(--text-secondary)', p: 0.5 }}>
+                          <IconButton disabled={isFormVisible} size="small" onClick={() => updateQuantity(String(item.id), 1)} sx={{ color: 'var(--text-secondary)', p: 0.5 }}>
                             <Add sx={{ fontSize: '16px' }} />
                           </IconButton>
                         </Box>
@@ -122,7 +201,7 @@ const Cart = () => {
                     </Box>
 
                     <Box sx={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', height: 76 }}>
-                      <IconButton disabled={isFormVisible} size="small" onClick={() => removeItem(item.id)} sx={{ color: 'rgba(255, 255, 255, 0.25)', p: 0.5, '&:hover': { color: '#ff4444', backgroundColor: 'rgba(255, 68, 68, 0.1)' } }}>
+                      <IconButton disabled={isFormVisible} size="small" onClick={() => removeItem(String(item.id))} sx={{ color: 'rgba(255, 255, 255, 0.25)', p: 0.5, '&:hover': { color: '#ff4444', backgroundColor: 'rgba(255, 68, 68, 0.1)' } }}>
                         <DeleteOutline sx={{ fontSize: '18px' }} />
                       </IconButton>
                       <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'var(--accent)', fontSize: '1rem' }}>

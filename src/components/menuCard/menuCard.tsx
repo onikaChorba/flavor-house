@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
-import { useCart } from '../../context/CartContext';
+import { useCart } from '../../context';
 
 interface MenuCardProps {
   item: {
