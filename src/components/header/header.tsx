@@ -42,11 +42,11 @@ const Header = () => {
   const totalPrice = cartItems.reduce((sum: number, item: CartItem) => sum + item.price * item.quantity, 0);
   const totalItems = cartItems.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
 
-  const prevCartItems = useRef<any[]>([]);
+  const prevCartItems = useRef<CartItem[]>([]);
 
   useEffect(() => {
     const addedItem = cartItems.find((item: CartItem) => {
-      const prevItem = prevCartItems.current.find(p => p.id === item.id);
+      const prevItem = prevCartItems.current.find((p: CartItem) => p.id === item.id);
       return !prevItem || item.quantity > prevItem.quantity;
     });
 
