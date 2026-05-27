@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context';
 import { ShoppingBag, DeleteOutline, Add, Remove, ArrowBackIos, CheckCircleOutline } from '@mui/icons-material';
 import { DeliveryForm } from '../deliveryForm/deliveryForm';
+import type { CartItem } from '../../types';
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
@@ -23,7 +24,7 @@ const Cart = () => {
 
   const [summaryData, setSummaryData] = useState<{ name: string; address: string; total: number; method: 'delivery' | 'pickup' } | null>(null);
 
-  const itemsPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const itemsPrice = cartItems.reduce((sum: number, item: CartItem) => sum + item.price * item.quantity, 0);
   const deliveryPrice = deliveryMethod === 'pickup' || itemsPrice >= 500 ? 0 : 60;
   const finalTotalPrice = itemsPrice + deliveryPrice;
 
@@ -167,7 +168,7 @@ const Cart = () => {
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3.5, opacity: isFormVisible ? 0.6 : 1, transition: 'opacity 0.2s' }}>
-                {cartItems.map((item: any) => (
+                {cartItems.map((item: CartItem) => (
                   <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     {item.image && (
                       <Box component="img" src={item.image} alt={item.name} sx={{ width: 76, height: 76, borderRadius: '16px', objectFit: 'cover', border: '1px solid rgba(255, 255, 255, 0.05)' }} />
@@ -183,13 +184,13 @@ const Cart = () => {
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Box sx={{ display: 'inline-flex', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.06)', p: '2px' }}>
-                          <IconButton disabled={isFormVisible} size="small" onClick={() => item.quantity > 1 ? updateQuantity(item.id, -1) : removeItem(item.id)} sx={{ color: 'var(--text-secondary)', p: 0.5 }}>
+                          <IconButton disabled={isFormVisible} size="small" onClick={() => item.quantity > 1 ? updateQuantity((String(item.id)), -1) : removeItem(String(item.id))} sx={{ color: 'var(--text-secondary)', p: 0.5 }}>
                             <Remove sx={{ fontSize: '16px' }} />
                           </IconButton>
                           <Typography sx={{ fontWeight: 700, minWidth: '24px', textAlign: 'center', fontSize: '0.9rem', color: '#fff' }}>
                             {item.quantity}
                           </Typography>
-                          <IconButton disabled={isFormVisible} size="small" onClick={() => updateQuantity(item.id, 1)} sx={{ color: 'var(--text-secondary)', p: 0.5 }}>
+                          <IconButton disabled={isFormVisible} size="small" onClick={() => updateQuantity(String(item.id), 1)} sx={{ color: 'var(--text-secondary)', p: 0.5 }}>
                             <Add sx={{ fontSize: '16px' }} />
                           </IconButton>
                         </Box>
@@ -200,7 +201,7 @@ const Cart = () => {
                     </Box>
 
                     <Box sx={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', height: 76 }}>
-                      <IconButton disabled={isFormVisible} size="small" onClick={() => removeItem(item.id)} sx={{ color: 'rgba(255, 255, 255, 0.25)', p: 0.5, '&:hover': { color: '#ff4444', backgroundColor: 'rgba(255, 68, 68, 0.1)' } }}>
+                      <IconButton disabled={isFormVisible} size="small" onClick={() => removeItem(String(item.id))} sx={{ color: 'rgba(255, 255, 255, 0.25)', p: 0.5, '&:hover': { color: '#ff4444', backgroundColor: 'rgba(255, 68, 68, 0.1)' } }}>
                         <DeleteOutline sx={{ fontSize: '18px' }} />
                       </IconButton>
                       <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'var(--accent)', fontSize: '1rem' }}>
