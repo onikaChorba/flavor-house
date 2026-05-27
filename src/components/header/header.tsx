@@ -10,6 +10,7 @@ import {
 import { Cart } from "../cart/cart";
 import { useCart, useAuth } from "../../context";
 import { AuthModal } from "../authModal/authModal";
+import type { CartItem } from "../../types";
 
 interface LastItemSummary {
   name: string;
@@ -38,8 +39,8 @@ const Header = () => {
   const { cartItems } = useCart();
   const { user, logout } = useAuth();
 
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = cartItems.reduce((sum: number, item: CartItem) => sum + item.price * item.quantity, 0);
+  const totalItems = cartItems.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
 
   const prevCartItems = useRef<any[]>([]);
 
