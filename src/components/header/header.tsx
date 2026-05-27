@@ -45,7 +45,7 @@ const Header = () => {
   const prevCartItems = useRef<any[]>([]);
 
   useEffect(() => {
-    const addedItem = cartItems.find(item => {
+    const addedItem = cartItems.find((item: CartItem) => {
       const prevItem = prevCartItems.current.find(p => p.id === item.id);
       return !prevItem || item.quantity > prevItem.quantity;
     });
@@ -59,7 +59,7 @@ const Header = () => {
       setSnackbarOpen(true);
     }
 
-    prevCartItems.current = cartItems.map(item => ({ ...item }));
+    prevCartItems.current = cartItems.map((item: CartItem) => ({ ...item }));
   }, [cartItems]);
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
