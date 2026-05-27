@@ -1,13 +1,15 @@
 import Icons from "../../icons";
 import { useState, useEffect, useRef } from "react";
 import { Link } from 'react-router-dom';
-import { Menu, Close, ShoppingBag } from '@mui/icons-material';
+import { Menu as MenuIcon, Close, ShoppingBag, PersonOutline, Logout } from '@mui/icons-material';
 import {
   AppBar, Toolbar, Button, Box, IconButton, Container, Drawer,
-  List, ListItem, ListItemButton, ListItemText, Snackbar, Typography
+  List, ListItem, ListItemButton, ListItemText, Snackbar, Typography,
+  Menu as AccountMenu, MenuItem, Divider, ListItemIcon
 } from "@mui/material";
 import { Cart } from "../cart/cart";
-import { useCart } from "../../context";
+import { useCart, useAuth } from "../../context";
+import { AuthModal } from "../authModal/authModal";
 
 interface LastItemSummary {
   name: string;
@@ -25,11 +27,17 @@ const Header = () => {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const isAccountMenuOpen = Boolean(anchorEl);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [lastAddedItem, setLastAddedItem] = useState<LastItemSummary | null>(null);
 
   const { cartItems } = useCart();
+  const { user, logout } = useAuth();
+
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -53,12 +61,19 @@ const Header = () => {
     prevCartItems.current = cartItems.map(item => ({ ...item }));
   }, [cartItems]);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const handleCartToggle = () => setCartOpen(!cartOpen);
 
-  const handleCartToggle = () => {
-    setCartOpen(!cartOpen);
+  const handleAccountMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+  const handleAccountMenuClose = () => setAnchorEl(null);
+
+  const handleLogoutClick = async () => {
+    try {
+      await logout();
+      handleAccountMenuClose();
+    } catch (err) {
+      console.error("Помилка під час виходу:", err);
+    }
   };
 
   const handleSnackbarClose = (_?: React.SyntheticEvent | Event, reason?: string) => {
@@ -77,20 +92,11 @@ const Header = () => {
           zIndex: 1201
         }}>
         <Container maxWidth="lg">
-          <Toolbar sx={{
-            display: 'flex',
-            justifyContent: "space-between",
-            padding: '0.5rem 0'
-          }}>
+          <Toolbar sx={{ display: 'flex', justifyContent: "space-between", padding: '0.5rem 0' }}>
+
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Link to="/">
-                <img
-                  src={Icons.logo}
-                  alt="Logo"
-                  style={{
-                    height: "40px",
-                    cursor: 'pointer'
-                  }} />
+                <img src={Icons.logo} alt="Logo" style={{ height: "40px", cursor: 'pointer' }} />
               </Link>
             </Box>
 
@@ -111,8 +117,80 @@ const Header = () => {
                 </Button>
               ))}
             </Box>
-
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+
+              {user ? (
+                <>
+                  <Button
+                    onClick={handleAccountMenuOpen}
+                    startIcon={<PersonOutline sx={{ color: 'var(--primary)' }} />}
+                    sx={{
+                      color: '#fff',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      px: 2,
+                      '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.08)' }
+                    }}
+                  >
+                    {user.displayName || 'Профіль'}
+                  </Button>
+                  <AccountMenu
+                    anchorEl={anchorEl}
+                    open={isAccountMenuOpen}
+                    onClose={handleAccountMenuClose}
+                    onClick={handleAccountMenuClose}
+                    slotProps={{
+                      paper: {
+                        sx: {
+                          backgroundColor: 'var(--bg-cards)',
+                          color: '#fff',
+                          border: '1px solid var(--borders)',
+                          borderRadius: '12px',
+                          mt: 1.5,
+                          boxShadow: '0px 8px 24px rgba(0,0,0,0.5)',
+                        }
+                      }
+                    }}
+                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                  >
+                    <Box sx={{ px: 2, py: 1 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                        {user.displayName || 'Користувач'}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                        {user.email}
+                      </Typography>
+                    </Box>
+                    <Divider sx={{ borderColor: 'var(--borders)' }} />
+                    <MenuItem onClick={handleLogoutClick} sx={{ color: '#ff4444', '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.08)' } }}>
+                      <ListItemIcon>
+                        <Logout fontSize="small" sx={{ color: '#ff4444' }} />
+                      </ListItemIcon>
+                      Вийти
+                    </MenuItem>
+                  </AccountMenu>
+                </>
+              ) : (
+                <Button
+                  variant="text"
+                  onClick={() => setAuthOpen(true)}
+                  startIcon={<PersonOutline />}
+                  sx={{
+                    color: 'var(--text-primary)',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderRadius: '11px',
+                    '&:hover': { color: 'var(--primary)', backgroundColor: 'rgba(255,122,24,0.05)' }
+                  }}
+                >
+                  Увійти
+                </Button>
+              )}
+
               <Button
                 variant="contained"
                 onClick={handleCartToggle}
@@ -129,7 +207,6 @@ const Header = () => {
               >
                 {totalItems > 0 ? `Кошик: ${totalPrice.toFixed(2)} ₴` : 'Кошик порожній'}
               </Button>
-
               <IconButton
                 onClick={handleCartToggle}
                 sx={{ display: { xs: 'flex', md: 'none' }, color: 'var(--primary)', position: 'relative' }}
@@ -148,7 +225,7 @@ const Header = () => {
               </IconButton>
 
               <IconButton onClick={handleDrawerToggle} sx={{ display: { xs: 'flex', md: 'none' }, color: 'var(--accent)' }}>
-                <Menu />
+                <MenuIcon />
               </IconButton>
             </Box>
           </Toolbar>
@@ -221,7 +298,6 @@ const Header = () => {
           </Box>
         </Drawer>
       </AppBar>
-
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={2500}
@@ -277,6 +353,8 @@ const Header = () => {
           )}
         </Box>
       </Snackbar>
+
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   );
 };

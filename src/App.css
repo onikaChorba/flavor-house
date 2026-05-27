@@ -23,3 +23,7 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
 }
+
+main{
+  padding: 20px 0px;
+}
