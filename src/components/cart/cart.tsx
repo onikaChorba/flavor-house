@@ -3,11 +3,14 @@ import { Typography, Box, IconButton, Button } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context';
 import { ShoppingBag, DeleteOutline, Add, Remove, ArrowBackIos, CheckCircleOutline } from '@mui/icons-material';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuth } from '../../context';
 import { DeliveryForm } from '../deliveryForm/deliveryForm';
 import type { CartItem } from '../../types';
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeItem, clearCart } = useCart();
+  const { user } = useAuth();
 
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -28,7 +31,7 @@ const Cart = () => {
   const deliveryPrice = deliveryMethod === 'pickup' || itemsPrice >= 500 ? 0 : 60;
   const finalTotalPrice = itemsPrice + deliveryPrice;
 
-  const handleActionClick = () => {
+  const handleActionClick = async () => {
     if (!isFormVisible) {
       setIsFormVisible(true);
       setTimeout(() => {
@@ -42,17 +45,55 @@ const Cart = () => {
       return;
     }
 
-    setSummaryData({
-      name: formData.name,
-      address: formData.address,
-      total: finalTotalPrice,
-      method: deliveryMethod,
-    });
+    let successInFirebase = false;
 
-    setIsSuccess(true);
-    clearCart();
-    setIsFormVisible(false);
-    setFormData({ name: '', phone: '', address: '', comments: '' });
+    try {
+      const db = getFirestore();
+      await addDoc(collection(db, "orders"), {
+        userId: user ? user.uid : "anonymous",
+        customerName: formData.name,
+        phone: formData.phone,
+        address: deliveryMethod === 'delivery' ? formData.address : 'Самовивіз',
+        comments: formData.comments,
+        items: cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        totalPrice: finalTotalPrice,
+        deliveryMethod: deliveryMethod,
+        createdAt: serverTimestamp(),
+        status: "pending"
+      });
+
+      successInFirebase = true;
+
+    } catch (error: any) {
+      console.error("Помилка збереження в Firestore:", error);
+      alert(`Помилка бази даних Firebase: ${error.message || error}`);
+    }
+
+    if (successInFirebase) {
+      setSummaryData({
+        name: formData.name,
+        address: formData.address,
+        total: finalTotalPrice,
+        method: deliveryMethod,
+      });
+
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
+      setIsSuccess(true);
+      setIsFormVisible(false);
+
+      setTimeout(() => {
+        clearCart();
+        setFormData({ name: '', phone: '', address: '', comments: '' });
+      }, 100);
+    }
   };
 
   const handleCloseSuccess = () => {
