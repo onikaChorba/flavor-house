@@ -1,7 +1,7 @@
 import Icons from "../../icons";
 import { useState, useEffect, useRef } from "react";
 import { Link } from 'react-router-dom';
-import { Menu as MenuIcon, Close, ShoppingBag, PersonOutline, Logout } from '@mui/icons-material';
+import { Menu as MenuIcon, Close, ShoppingBag, PersonOutline, Logout, History } from '@mui/icons-material';
 import {
   AppBar, Toolbar, Button, Box, IconButton, Container, Drawer,
   List, ListItem, ListItemButton, ListItemText, Snackbar, Typography,
@@ -166,6 +166,19 @@ const Header = () => {
                         {user.email}
                       </Typography>
                     </Box>
+                    <Divider sx={{ borderColor: 'var(--borders)' }} />
+                    <MenuItem
+                      component={Link}
+                      to="/orders"
+                      onClick={handleAccountMenuClose}
+                      sx={{ '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}
+                    >
+                      <ListItemIcon>
+                        <History fontSize="small" sx={{ color: 'var(--primary)' }} />
+                      </ListItemIcon>
+                      Історія замовлень
+                    </MenuItem>
+
                     <Divider sx={{ borderColor: 'var(--borders)' }} />
                     <MenuItem onClick={handleLogoutClick} sx={{ color: '#ff4444', '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.08)' } }}>
                       <ListItemIcon>
